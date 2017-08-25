@@ -33,6 +33,19 @@ export default class CGOL {
     document.addEventListener('keydown', this.handleKeydown.bind(this));
   }
 
+  public _update() {
+    // let cellLiveNeighborsCount = cell.getLiveNeighborsCount();
+    // if(cell.isAlive){
+    //   if(cellLiveNeighborsCount < 2 || cellLiveNeighborsCount > 3) {
+    //     cell.die();
+    //   }
+    // }else{
+    //   if(cellLiveNeighborsCount === 3){
+    //     cell.revive();
+    //   }
+    // }
+  }
+
   public handleKeydown(e: any) {
     switch (e.keyCode) {
       case 37: this.handleLeftArrow();

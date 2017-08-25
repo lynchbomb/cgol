@@ -11,6 +11,7 @@ export default class Cell {
   public width: number = 1;
   public height: number = 1;
   public coords: ICoords[];
+  public isAlive: boolean;
 
   constructor(options: ICellOptions) {
     this.heading = options.heading || this.heading;
@@ -22,6 +23,18 @@ export default class Cell {
     this.coords = [];
 
     this.defaultCoords();
+  }
+
+  public getLiveNeighborsCount() {
+    return 3;
+  }
+
+  public die() {
+    this.isAlive = false;
+  }
+
+  public revive() {
+    this.isAlive = true;
   }
 
   public defaultCoords() {

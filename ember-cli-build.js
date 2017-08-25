@@ -90,6 +90,9 @@ module.exports = function () {
         }]
       }
     }),
+    new Funnel('src', {
+      include: ['index.html']
+    }),
     new Funnel(path.dirname(require.resolve('qunitjs')), {
       annotation: 'tests/qunit.{js,css}',
       destDir: 'tests',
