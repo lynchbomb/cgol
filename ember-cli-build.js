@@ -90,9 +90,6 @@ module.exports = function () {
         }]
       }
     }),
-    new Funnel('src', {
-      include: ['index.html']
-    }),
     new Funnel(path.dirname(require.resolve('qunitjs')), {
       annotation: 'tests/qunit.{js,css}',
       destDir: 'tests',
@@ -105,6 +102,9 @@ module.exports = function () {
     }),
     new Funnel(__dirname + '/tests', {
       destDir: 'tests',
+      files: ['index.html']
+    }),
+    new Funnel(__dirname + '/src', {
       files: ['index.html']
     })
   ], {

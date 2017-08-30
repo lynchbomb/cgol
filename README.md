@@ -18,16 +18,3 @@ If an alive cell has > 3 live neighbor cells it dies
 
 4. Generation Rule #4
 If a dead cell has === 3 live neighbors it becomes alive
-
-
-let cellLiveNeighborsCount = cell.getLiveNeighborsCount();
-
-if(cell.isAlive){
-  if(cellLiveNeighborsCount < 2 || cellLiveNeighborsCount > 3) {
-    cell.die();
-  }
-}else{
-  if(cellLiveNeighborsCount === 3){
-    cell.revive();
-  }
-}

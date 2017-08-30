@@ -2,23 +2,19 @@ import Cell from './cell';
 import { ICellOptions } from './interfaces/i-cell-options';
 import { ICoords } from './interfaces/i-coords';
 
-export default class CGOL {
+class CGOL {
 
-  public cell = <Cell> {};
+  public cells: any;
+  public canvasWidth: number = 0;
+  public canvasHeight: number = 0;
   public $canvas = <HTMLCanvasElement> document.getElementById('canvas');
   public canvasContext = <CanvasRenderingContext2D> this.$canvas.getContext('2d');
-  public canvasWidth = <number> 0;
-  public canvasHeight = <number> 0;
-
-  public someNum = 1;
+  public canvasScaleWidth: number = 10;
+  public canvasScaleHeight: number = 10;
 
   constructor() {
-    this.initCanvas('#000');
-    this.cell = new Cell({
-      fillStyle: 'green',
-      origin: [{x: this.canvasWidth / 2, y: this.canvasHeight / 2}]
-    });
-    this.eventController();
+    this.initCanvas();
+    this.initCells();
     this.update();
   }
 
@@ -27,13 +23,33 @@ export default class CGOL {
     this.canvasHeight = this.$canvas.height;
     this.canvasContext.fillStyle = fillStyle;
     this.canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    this.canvasContext.scale(10, 10);
   }
 
-  public eventController() {
-    document.addEventListener('keydown', this.handleKeydown.bind(this));
+  public initCells() {
+    // scene is 400 x 400 or 40 x 40 cells each 10 x 10 at a scale of 10 x 10
+    let _cellCountX: number = this.canvasWidth / this.canvasScaleWidth;
+    let _cellCountY: number = this.canvasHeight / this.canvasScaleHeight;
+
+    this.cells = new Array(_cellCountX).fill(new Array(_cellCountY).fill(new Cell({
+      coords: { x: 0, y: 0 },
+      width: 10,
+      height: 10
+    })));
+
+    this.cells.forEach((cellRow: Cell[], _x: number) => {
+      cellRow.forEach((cell: Cell, _y: number) => {
+        cell.coords.x = _x;
+        cell.coords.y = _y;
+        this.renderPoint(cell);
+      });
+    });
   }
 
-  public _update() {
+  public _cellCondition() {
+    // this.cells.forEach((cell) => {
+    //   cell.
+    // });
     // let cellLiveNeighborsCount = cell.getLiveNeighborsCount();
     // if(cell.isAlive){
     //   if(cellLiveNeighborsCount < 2 || cellLiveNeighborsCount > 3) {
@@ -46,39 +62,6 @@ export default class CGOL {
     // }
   }
 
-  public handleKeydown(e: any) {
-    switch (e.keyCode) {
-      case 37: this.handleLeftArrow();
-        break;
-      case 38: this.handleUpArrow();
-        break;
-      case 39: this.handleRightArrow();
-        break;
-      case 40: this.handleDownArrow();
-        break;
-      default: return;
-    }
-  }
-
-  public handleLeftArrow() {
-    this.cell.heading = 0;
-  }
-
-  public handleUpArrow() {
-    this.cell.heading = 1;
-  }
-
-  public handleRightArrow() {
-    this.cell.heading = 2;
-
-    // throw-away
-    this.cell.incrementDirection('right');
-  }
-
-  public handleDownArrow() {
-    this.cell.heading = 3;
-  }
-
   public clearCanvas(x: number = 0, y: number = 0, width: number = this.canvasWidth, height: number = this.canvasHeight) {
 		// instead of clearing the entire canvas
     // just pass the object/proto to be cleared
@@ -88,15 +71,13 @@ export default class CGOL {
     return true;
   }
 
-  public renderPoint(renderedPoint: ICoords) {
-    this.canvasContext.fillStyle = this.cell.fillStyle;
-    // fill a point that is {x:0,y:0, 1, 1}
-    this.canvasContext.fillRect(renderedPoint.x, renderedPoint.y, this.cell.width, this.cell.height);
+  public renderPoint(cell: Cell) {
+    this.canvasContext.fillStyle = cell.fillStyle;
+    this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
 
-    return renderedPoint;
+    return cell;
   }
 
-  // TODO: prob delete this method
   public updateRenderedPoint(renderedPoint: ICoords) {
     renderedPoint.x++;
     renderedPoint.y++;
@@ -104,20 +85,9 @@ export default class CGOL {
     return renderedPoint;
   }
 
-  public eat() {
-
-  }
-
   public update() {
-    for (let i = 0; i < this.cell.coords.length; i++) {
-      // {x:0, y:0}
-      let coords = this.cell.coords[i];
-      // point above is rendered to canvas
-      let _renderedPointMeta = this.renderPoint(coords);
-
-      // this.renderedPointMeta = this.updateRenderedPoint(_renderedPointMeta);
-      // this.clearCanvas(_renderedPointMeta.x, _renderedPointMeta.y, _renderedPointMeta.width, _renderedPointMeta.height);
-    }
+    // this.clearCanvas(_renderedPointMeta.x, _renderedPointMeta.y, _renderedPointMeta.width, _renderedPointMeta.height);
+    // this._cellCondition();
 
     window.requestAnimationFrame(this.update.bind(this));
   }
