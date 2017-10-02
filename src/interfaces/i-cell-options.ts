@@ -6,4 +6,5 @@ export interface ICellOptions {
   width?: number;
   height?: number;
   isAlive?: boolean;
+  liveNeighborsCount?: number;
 };
