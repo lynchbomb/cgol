@@ -50,20 +50,33 @@ class CGOL {
     });
   }
 
-  public _cellCondition() {
-    // this.cells.forEach((cell) => {
-    //   cell.
-    // });
-    // let cellLiveNeighborsCount = cell.getLiveNeighborsCount();
-    // if(cell.isAlive){
-    //   if(cellLiveNeighborsCount < 2 || cellLiveNeighborsCount > 3) {
-    //     cell.die();
-    //   }
-    // }else{
-    //   if(cellLiveNeighborsCount === 3){
-    //     cell.revive();
-    //   }
-    // }
+  /********************************************
+  *********************************************
+
+  [ ALL METHODS BELOW ARE RUNNING AT 60 FPS!! ]
+
+  *********************************************
+  *********************************************/
+
+  public runRules() {
+    // iterate over the entire matrix
+    // each cell within the matrix run `liveNeighbors = cell.getLiveNeighborsCount(this.cells)`
+
+    this.cells.forEach((cellRow: Cell[], _x: number) => {
+      cellRow.forEach((cell: Cell, _y: number) => {
+        let liveNeighbors = cell.getLiveNeighborsCount(this.cells);
+
+        if (cell.isAlive) {
+          if (liveNeighbors < 2 || liveNeighbors > 3) {
+            cell.die();
+          }
+        }else {
+          if (liveNeighbors === 3) {
+            cell.revive();
+          }
+        }
+      });
+    });
   }
 
   public clearCanvas(x: number = 0, y: number = 0, width: number = this.canvasMeta.canvasWidth, height: number = this.canvasMeta.canvasHeight): boolean {
@@ -91,7 +104,7 @@ class CGOL {
 
   public update() {
     this.clearCanvas();
-    // this._cellCondition();
+    this.runRules();
 
     window.requestAnimationFrame(this.update.bind(this));
   }
