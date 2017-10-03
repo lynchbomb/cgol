@@ -25,7 +25,7 @@ export default class Cell implements ICellOptions {
     this.setFillStyle = '#aaa';
   }
 
-  public getLiveNeighborsCount(cells: Array<[Cell]>, distance: number = 1): number {
+  public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
     /*
       0,0,0
       0,X,0

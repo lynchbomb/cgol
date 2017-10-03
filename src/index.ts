@@ -64,7 +64,7 @@ class CGOL {
 
     this.cells.forEach((cellRow: Cell[], _x: number) => {
       cellRow.forEach((cell: Cell, _y: number) => {
-        let liveNeighbors = cell.getLiveNeighborsCount(this.cells);
+        let liveNeighbors = cell.getLiveNeighborsCount(cell, this.cells);
 
         if (cell.isAlive) {
           if (liveNeighbors < 2 || liveNeighbors > 3) {
@@ -75,6 +75,8 @@ class CGOL {
             cell.revive();
           }
         }
+
+        this.renderCell(cell);
       });
     });
   }
@@ -88,24 +90,16 @@ class CGOL {
     return true;
   }
 
-  public renderPoint(cell: Cell): Cell {
+  public renderCell(cell: Cell): Cell {
     this.canvasContext.fillStyle = cell.fillStyle;
     this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
 
     return cell;
   }
 
-  public updateRenderedPoint(renderedPoint: ICoords): ICoords {
-    renderedPoint.x++;
-    renderedPoint.y++;
-
-    return renderedPoint;
-  }
-
   public update() {
     this.clearCanvas();
     this.runRules();
-
     window.requestAnimationFrame(this.update.bind(this));
   }
 };
