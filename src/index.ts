@@ -5,7 +5,7 @@ import { ICellOptions } from './interfaces/i-cell-options';
 import { ICoords } from './interfaces/i-coords';
 
 class CGOL {
-  public cells: Array<[Cell]>;
+  public cells: Array<[Cell]> | any;
   public $canvas = document.getElementById('canvas') as HTMLCanvasElement;
   public canvasContext = this.$canvas.getContext('2d') as CanvasRenderingContext2D;
   public canvasMeta: ICanvasMeta = {
@@ -19,6 +19,8 @@ class CGOL {
   constructor() {
     this.initCanvas();
     this.initCells();
+    this.initRenderCells();
+    this.runRules();
     this.update();
   }
 
@@ -35,19 +37,17 @@ class CGOL {
     let _cellCountX: number = this.canvasMeta.canvasWidth / this.canvasMeta.canvasScaleWidth;
     let _cellCountY: number = this.canvasMeta.canvasHeight / this.canvasMeta.canvasScaleHeight;
 
-    // instantiate cells and push them into an array
-    // this.cells = new Array(_cellCountX).fill(new Array(_cellCountY).fill(this.cellFactory.init({})));
-    this.cells = new Array(_cellCountX).fill(new Array(_cellCountY).fill(0));
+    this.cells = this.generateMatrix(_cellCountX, _cellCountY);
 
-    // !TODO had an issue that the factory is being ignored and inheriting the protype rather than instance
-    this.cells.forEach((cellRow: Cell[], _x: number) => {
-      cellRow.forEach((cell: Cell, _y: number) => {
-        cell = this.cellFactory.init({});
-        cell.coords.x = _x;
-        cell.coords.y = _y;
-        this.renderPoint(cell);
+    this.cells.forEach((cellRow: Cell[], y: number) => {
+      cellRow.forEach((cell: Cell, x: number) => {
+        this.cells[y][x] = this.cellFactory.init({});
+        this.cells[y][x].coords.x = x;
+        this.cells[y][x].coords.y = y;
       });
     });
+
+    this.initRenderCells();
   }
 
   /********************************************
@@ -60,10 +60,9 @@ class CGOL {
 
   public runRules() {
     // iterate over the entire matrix
-    // each cell within the matrix run `liveNeighbors = cell.getLiveNeighborsCount(this.cells)`
-
-    this.cells.forEach((cellRow: Cell[], _x: number) => {
-      cellRow.forEach((cell: Cell, _y: number) => {
+    // each cell within the matrix run `liveNeighbors = cell.getLiveNeighborsCount(this.cells)
+    this.cells.forEach((cellRow: Cell[]) => {
+      cellRow.forEach((cell: Cell) => {
         let liveNeighbors = cell.getLiveNeighborsCount(cell, this.cells);
 
         if (cell.isAlive) {
@@ -90,6 +89,14 @@ class CGOL {
     return true;
   }
 
+  public initRenderCells() {
+    this.cells.forEach((cellRow: Cell[], y: number) => {
+      cellRow.forEach((cell: Cell, x: number) => {
+        this.renderCell(cell);
+      });
+    });
+  }
+
   public renderCell(cell: Cell): Cell {
     this.canvasContext.fillStyle = cell.fillStyle;
     this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
@@ -98,8 +105,12 @@ class CGOL {
   }
 
   public update() {
-    this.clearCanvas();
-    this.runRules();
+    this.clearCanvas.bind(this);
+    this.runRules.bind(this);
     window.requestAnimationFrame(this.update.bind(this));
+  }
+
+  private generateMatrix(rows: number, columns: number, fillWith: any = undefined) {
+    return new Array(rows).fill(fillWith).map(() => new Array(columns).fill(fillWith));
   }
 };
