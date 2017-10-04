@@ -5,7 +5,7 @@ import { ICoords } from './interfaces/i-coords';
 import { generateMatrix, randomVectorBetween } from './utils';
 
 class CGOL {
-  public FPS_THROTTLE = 15;
+  public FPS_THROTTLE: null | number = 15;
   public cells: Array<[Cell]> | any;
   public $canvas = document.getElementById('canvas') as HTMLCanvasElement;
   public canvasContext = this.$canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -73,15 +73,14 @@ class CGOL {
         if (cell.isAlive) {
           if (liveNeighbors < 2 || liveNeighbors > 3) {
             cell.die();
-          }else if (liveNeighbors === 2 || liveNeighbors === 3) {
-             cell.revive();
+            this.clearCanvas(cell.coords.x, cell.coords.y, cell.width, cell.height);
           }
         }else {
           if (liveNeighbors === 3) {
             cell.revive();
+            this.clearCanvas(cell.coords.x, cell.coords.y, cell.width, cell.height);
           }
         }
-
         this.renderCell(cell);
       });
     });
@@ -114,20 +113,20 @@ class CGOL {
   }
 
   public clearCanvas(x: number = 0, y: number = 0, width: number = this.canvasMeta.canvasWidth, height: number = this.canvasMeta.canvasHeight): boolean {
-		// instead of clearing the entire canvas
-    // just pass the instance to be cleared
-    // default is the clear the entire canvas
     this.canvasContext.clearRect(x, y, width, height);
 
     return true;
   }
 
   public update() {
-    this.clearCanvas();
     this.runRules();
-    
-    setTimeout(() => {
+
+    if (this.FPS_THROTTLE) {
+      setTimeout(() => {
+        window.requestAnimationFrame(this.update.bind(this));
+      }, 1000 / this.FPS_THROTTLE);
+    }else {
       window.requestAnimationFrame(this.update.bind(this));
-    }, 1000 / this.FPS_THROTTLE);
+    }
   }
 };
