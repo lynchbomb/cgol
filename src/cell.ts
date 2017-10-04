@@ -2,7 +2,7 @@ import { ICellOptions } from './interfaces/i-cell-options';
 import { ICoords } from './interfaces/i-coords';
 
 export default class Cell implements ICellOptions {
-  public fillStyle: string;
+  public fillStyle: string | any = '#000';
   public width: number = 10;
   public height: number = 10;
   public coords: ICoords = {x: 0, y: 0};
@@ -12,7 +12,8 @@ export default class Cell implements ICellOptions {
 
   constructor(options: ICellOptions) {
     this.coords = options.coords || {x: 0, y: 0};
-    this.fillStyle = options.fillStyle || this.getRandomColor;
+    this.fillStyle = options.fillStyle;
+    if (options.isAlive) { this.revive(); }
   }
 
   public die() {
@@ -25,23 +26,25 @@ export default class Cell implements ICellOptions {
     this.setFillStyle = '#aaa';
   }
 
+  public randomizeLife() {
+    let _isAlive = Math.random() >= 0.5;
+    if (_isAlive) {
+      this.revive();
+    }else {
+      this.die();
+    }
+  }
+
   public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
-    /*
-      0,0,0
-      0,X,0
-      0,0,0
-    */
-    // `distance` from this cell = 1
     cells.forEach((cellRow: Cell[], _x: number) => {
       cellRow.forEach((cellNeighbor: Cell, _y: number) => {
         if (Math.abs(this.coords.x - cellNeighbor.coords.x) <= distance) {
           if (Math.abs(this.coords.y - cellNeighbor.coords.y) <= distance) {
-            this.prevLiveNeighborsCount++;
+            ++this.prevLiveNeighborsCount;
           }
         }
       });
     });
-
     this.currentLiveNeighborsCount = this.prevLiveNeighborsCount;
     this.prevLiveNeighborsCount = 0;
 

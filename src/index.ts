@@ -3,6 +3,7 @@ import CellFactory from './cell-factory';
 import { ICanvasMeta } from './interfaces/i-canvas-meta';
 import { ICellOptions } from './interfaces/i-cell-options';
 import { ICoords } from './interfaces/i-coords';
+import { generateMatrix, randomVectorBetween } from './utils';
 
 class CGOL {
   public cells: Array<[Cell]> | any;
@@ -20,7 +21,7 @@ class CGOL {
     this.initCanvas();
     this.initCells();
     this.initRenderCells();
-    this.runRules();
+    // this.runRules();
     this.update();
   }
 
@@ -37,17 +38,27 @@ class CGOL {
     let _cellCountX: number = this.canvasMeta.canvasWidth / this.canvasMeta.canvasScaleWidth;
     let _cellCountY: number = this.canvasMeta.canvasHeight / this.canvasMeta.canvasScaleHeight;
 
-    this.cells = this.generateMatrix(_cellCountX, _cellCountY);
+    this.cells = generateMatrix(_cellCountX, _cellCountY);
 
     this.cells.forEach((cellRow: Cell[], y: number) => {
       cellRow.forEach((cell: Cell, x: number) => {
         this.cells[y][x] = this.cellFactory.init({});
         this.cells[y][x].coords.x = x;
         this.cells[y][x].coords.y = y;
+        // TODO: this isn't being set as default
+        this.cells[y][x].randomizeLife();
       });
     });
 
     this.initRenderCells();
+  }
+
+  public initRenderCells() {
+    this.cells.forEach((cellRow: Cell[], y: number) => {
+      cellRow.forEach((cell: Cell, x: number) => {
+        this.renderCell(cell);
+      });
+    });
   }
 
   /********************************************
@@ -80,6 +91,13 @@ class CGOL {
     });
   }
 
+  public renderCell(cell: Cell): Cell {
+    this.canvasContext.fillStyle = cell.fillStyle;
+    this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
+
+    return cell;
+  }
+
   public clearCanvas(x: number = 0, y: number = 0, width: number = this.canvasMeta.canvasWidth, height: number = this.canvasMeta.canvasHeight): boolean {
 		// instead of clearing the entire canvas
     // just pass the object/proto to be cleared
@@ -89,28 +107,9 @@ class CGOL {
     return true;
   }
 
-  public initRenderCells() {
-    this.cells.forEach((cellRow: Cell[], y: number) => {
-      cellRow.forEach((cell: Cell, x: number) => {
-        this.renderCell(cell);
-      });
-    });
-  }
-
-  public renderCell(cell: Cell): Cell {
-    this.canvasContext.fillStyle = cell.fillStyle;
-    this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
-
-    return cell;
-  }
-
   public update() {
     this.clearCanvas.bind(this);
     this.runRules.bind(this);
     window.requestAnimationFrame(this.update.bind(this));
-  }
-
-  private generateMatrix(rows: number, columns: number, fillWith: any = undefined) {
-    return new Array(rows).fill(fillWith).map(() => new Array(columns).fill(fillWith));
   }
 };
