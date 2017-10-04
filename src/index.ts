@@ -5,6 +5,7 @@ import { ICoords } from './interfaces/i-coords';
 import { generateMatrix, randomVectorBetween } from './utils';
 
 class CGOL {
+  public FPS_THROTTLE = 15;
   public cells: Array<[Cell]> | any;
   public $canvas = document.getElementById('canvas') as HTMLCanvasElement;
   public canvasContext = this.$canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -65,8 +66,6 @@ class CGOL {
   *********************************************/
 
   public runRules() {
-    // iterate over the entire matrix
-    // each cell within the matrix run `liveNeighbors = cell.getLiveNeighborsCount(this.cells)
     this.cells.forEach((cellRow: Cell[]) => {
       cellRow.forEach((cell: Cell) => {
         let liveNeighbors = this.getLiveNeighborsCount(cell, this.cells);
@@ -74,6 +73,8 @@ class CGOL {
         if (cell.isAlive) {
           if (liveNeighbors < 2 || liveNeighbors > 3) {
             cell.die();
+          }else if (liveNeighbors === 2 || liveNeighbors === 3) {
+             cell.revive();
           }
         }else {
           if (liveNeighbors === 3) {
@@ -98,6 +99,7 @@ class CGOL {
         }
       });
     });
+
     cell.currentLiveNeighborsCount = cell.prevLiveNeighborsCount;
     cell.prevLiveNeighborsCount = 0;
 
@@ -123,6 +125,9 @@ class CGOL {
   public update() {
     this.clearCanvas();
     this.runRules();
-    window.requestAnimationFrame(this.update.bind(this));
+    
+    setTimeout(() => {
+      window.requestAnimationFrame(this.update.bind(this));
+    }, 1000 / this.FPS_THROTTLE);
   }
 };

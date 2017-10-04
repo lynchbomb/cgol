@@ -39,8 +39,8 @@ export default class Cell implements ICellOptions {
     return '#' + Math.floor(Math.random() * (9999999 - 0o0)).toString(16);
   }
 
-  private randomizeLife() {
-    let _isAlive = Math.random() >= 0.5;
+  private randomizeLife(percentDead: number = 0.95) {
+    let _isAlive = Math.random() >= percentDead;
     if (_isAlive) {
       this.revive();
     }else {
