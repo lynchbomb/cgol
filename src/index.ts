@@ -1,5 +1,4 @@
 import Cell from './cell';
-import CellFactory from './cell-factory';
 import { ICanvasMeta } from './interfaces/i-canvas-meta';
 import { ICellOptions } from './interfaces/i-cell-options';
 import { ICoords } from './interfaces/i-coords';
@@ -15,13 +14,11 @@ class CGOL {
     canvasScaleWidth: 10,
     canvasScaleHeight: 10
   };
-  public cellFactory = new CellFactory();
 
   constructor() {
     this.initCanvas();
     this.initCells();
     this.initRenderCells();
-    // this.runRules();
     this.update();
   }
 
@@ -40,13 +37,11 @@ class CGOL {
 
     this.cells = generateMatrix(_cellCountX, _cellCountY);
 
-    this.cells.forEach((cellRow: Cell[], y: number) => {
-      cellRow.forEach((cell: Cell, x: number) => {
-        this.cells[y][x] = this.cellFactory.init({});
-        this.cells[y][x].coords.x = x;
-        this.cells[y][x].coords.y = y;
-        // TODO: this isn't being set as default
-        this.cells[y][x].randomizeLife();
+    this.cells.forEach((cellRow: Cell[], _y: number) => {
+      cellRow.forEach((cell: Cell, _x: number) => {
+        this.cells[_y][_x] = new Cell({
+          coords: {x: _x, y: _y}
+        });
       });
     });
 
@@ -74,7 +69,7 @@ class CGOL {
     // each cell within the matrix run `liveNeighbors = cell.getLiveNeighborsCount(this.cells)
     this.cells.forEach((cellRow: Cell[]) => {
       cellRow.forEach((cell: Cell) => {
-        let liveNeighbors = cell.getLiveNeighborsCount(cell, this.cells);
+        let liveNeighbors = this.getLiveNeighborsCount(cell, this.cells);
 
         if (cell.isAlive) {
           if (liveNeighbors < 2 || liveNeighbors > 3) {
@@ -91,6 +86,24 @@ class CGOL {
     });
   }
 
+  public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
+    cells.forEach((cellRow: Cell[], _x: number) => {
+      cellRow.forEach((cellNeighbor: Cell, _y: number) => {
+        if (Math.abs(cell.coords.x - cellNeighbor.coords.x) <= distance) {
+          if (Math.abs(cell.coords.y - cellNeighbor.coords.y) <= distance) {
+            if (cellNeighbor.isAlive) {
+              ++cell.prevLiveNeighborsCount;
+            }
+          }
+        }
+      });
+    });
+    cell.currentLiveNeighborsCount = cell.prevLiveNeighborsCount;
+    cell.prevLiveNeighborsCount = 0;
+
+    return cell.currentLiveNeighborsCount;
+  }
+
   public renderCell(cell: Cell): Cell {
     this.canvasContext.fillStyle = cell.fillStyle;
     this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
@@ -100,7 +113,7 @@ class CGOL {
 
   public clearCanvas(x: number = 0, y: number = 0, width: number = this.canvasMeta.canvasWidth, height: number = this.canvasMeta.canvasHeight): boolean {
 		// instead of clearing the entire canvas
-    // just pass the object/proto to be cleared
+    // just pass the instance to be cleared
     // default is the clear the entire canvas
     this.canvasContext.clearRect(x, y, width, height);
 
@@ -108,8 +121,8 @@ class CGOL {
   }
 
   public update() {
-    this.clearCanvas.bind(this);
-    this.runRules.bind(this);
+    this.clearCanvas();
+    this.runRules();
     window.requestAnimationFrame(this.update.bind(this));
   }
 };

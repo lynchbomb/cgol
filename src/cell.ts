@@ -13,7 +13,7 @@ export default class Cell implements ICellOptions {
   constructor(options: ICellOptions) {
     this.coords = options.coords || {x: 0, y: 0};
     this.fillStyle = options.fillStyle;
-    if (options.isAlive) { this.revive(); }
+    this.randomizeLife();
   }
 
   public die() {
@@ -24,31 +24,6 @@ export default class Cell implements ICellOptions {
   public revive() {
     this.isAlive = true;
     this.setFillStyle = '#aaa';
-  }
-
-  public randomizeLife() {
-    let _isAlive = Math.random() >= 0.5;
-    if (_isAlive) {
-      this.revive();
-    }else {
-      this.die();
-    }
-  }
-
-  public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
-    cells.forEach((cellRow: Cell[], _x: number) => {
-      cellRow.forEach((cellNeighbor: Cell, _y: number) => {
-        if (Math.abs(this.coords.x - cellNeighbor.coords.x) <= distance) {
-          if (Math.abs(this.coords.y - cellNeighbor.coords.y) <= distance) {
-            ++this.prevLiveNeighborsCount;
-          }
-        }
-      });
-    });
-    this.currentLiveNeighborsCount = this.prevLiveNeighborsCount;
-    this.prevLiveNeighborsCount = 0;
-
-    return this.currentLiveNeighborsCount;
   }
 
   public set setFillStyle(fillStyle: string) {
@@ -62,5 +37,14 @@ export default class Cell implements ICellOptions {
   // add color sampling for gradients and patterns etc
   private get getRandomColor(): string {
     return '#' + Math.floor(Math.random() * (9999999 - 0o0)).toString(16);
+  }
+
+  private randomizeLife() {
+    let _isAlive = Math.random() >= 0.5;
+    if (_isAlive) {
+      this.revive();
+    }else {
+      this.die();
+    }
   }
 };
