@@ -7,4 +7,5 @@ export interface ICellOptions {
   height?: number;
   isAlive?: boolean;
   liveNeighborsCount?: number;
+  probabilityDOA?: number;
 };

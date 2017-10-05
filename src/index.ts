@@ -1,3 +1,4 @@
+import * as GUI from 'dat.gui';
 import Cell from './cell';
 import { ICanvasMeta } from './interfaces/i-canvas-meta';
 import { ICellOptions } from './interfaces/i-cell-options';
@@ -5,22 +6,24 @@ import { ICoords } from './interfaces/i-coords';
 import { generateMatrix, randomVectorBetween } from './utils';
 
 class CGOL {
-  public FPS_THROTTLE: null | number = 15;
+  public FPS_THROTTLE: null | number;
+  public cellWidth: number = 50;
+  public cellHeight: number = 50;
   public cells: Array<[Cell]> | any;
   public $canvas = document.getElementById('canvas') as HTMLCanvasElement;
   public canvasContext = this.$canvas.getContext('2d') as CanvasRenderingContext2D;
   public canvasMeta: ICanvasMeta = {
     canvasWidth: 0,
     canvasHeight: 0,
-    canvasScaleWidth: 10,
-    canvasScaleHeight: 10
+    canvasScaleWidth: this.cellWidth,
+    canvasScaleHeight: this.cellHeight
   };
 
   constructor() {
     this.initCanvas();
     this.initCells();
     this.initRenderCells();
-    this.update();
+    // this.update();
   }
 
   public initCanvas(fillStyle: string = '#000') {
@@ -28,20 +31,26 @@ class CGOL {
     this.canvasMeta.canvasHeight = this.$canvas.height;
     this.canvasContext.fillStyle = fillStyle;
     this.canvasContext.fillRect(0, 0, this.canvasMeta.canvasWidth, this.canvasMeta.canvasHeight);
-    this.canvasContext.scale(10, 10);
+    this.canvasContext.scale(this.canvasMeta.canvasScaleWidth, this.canvasMeta.canvasScaleHeight);
   }
 
   public initCells() {
-    // scene is 400 x 400 or 40 x 40 cells each 10 x 10 at a scale of 10 x 10
-    let _cellCountX: number = this.canvasMeta.canvasWidth / this.canvasMeta.canvasScaleWidth;
-    let _cellCountY: number = this.canvasMeta.canvasHeight / this.canvasMeta.canvasScaleHeight;
+    // cellCountX/Y = canvasWidth:canvasHeight / cellWidth:cellHeight
+    // cellWidth/Height should always === canvasScaleWidth/Height
+    let _cellWidth: number = this.cellWidth;
+    let _cellHeight: number = this.cellHeight;
+    let _cellCountX: number = this.canvasMeta.canvasWidth / _cellWidth;
+    let _cellCountY: number = this.canvasMeta.canvasHeight / _cellHeight;
 
     this.cells = generateMatrix(_cellCountX, _cellCountY);
 
     this.cells.forEach((cellRow: Cell[], _y: number) => {
       cellRow.forEach((cell: Cell, _x: number) => {
         this.cells[_y][_x] = new Cell({
-          coords: {x: _x, y: _y}
+          coords: {x: _x, y: _y},
+          width: _cellWidth,
+          height: _cellHeight,
+          probabilityDOA: 0.85
         });
       });
     });

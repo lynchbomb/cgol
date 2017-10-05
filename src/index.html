@@ -13,6 +13,22 @@
         background: #777;
       }
     </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.5/dat.gui.min.js"></script>
+    <script type="text/javascript">
+      var FizzyText = function() {
+        this.message = 'dat.gui';
+        this.speed = 0.8;
+        this.displayOutline = false;
+      };
+
+      window.onload = function() {
+        var text = new FizzyText();
+        var gui = new dat.GUI();
+        gui.add(text, 'message');
+        gui.add(text, 'speed', -5, 5);
+        gui.add(text, 'displayOutline');
+      };
+    </script>
   </head>
   <body>
     <div>
