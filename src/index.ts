@@ -6,10 +6,11 @@ import { ICoords } from './interfaces/i-coords';
 import { generateMatrix, randomVectorBetween } from './utils';
 
 class CGOL {
-  public FPS_THROTTLE: null | number;
-  public cellWidth: number = 50;
-  public cellHeight: number = 50;
+  public FPS_THROTTLE: null | number = 5;
+  public cellWidth: number = 10;
+  public cellHeight: number = 10;
   public cells: Array<[Cell]> | any;
+  public newCells: Array<[Cell]> | any;
   public $canvas = document.getElementById('canvas') as HTMLCanvasElement;
   public canvasContext = this.$canvas.getContext('2d') as CanvasRenderingContext2D;
   public canvasMeta: ICanvasMeta = {
@@ -23,7 +24,7 @@ class CGOL {
     this.initCanvas();
     this.initCells();
     this.initRenderCells();
-    // this.update();
+    this.update();
   }
 
   public initCanvas(fillStyle: string = '#000') {
@@ -50,7 +51,7 @@ class CGOL {
           coords: {x: _x, y: _y},
           width: _cellWidth,
           height: _cellHeight,
-          probabilityDOA: 0.85
+          probabilityDOA: 0.95
         });
       });
     });
@@ -73,6 +74,24 @@ class CGOL {
 
   *********************************************
   *********************************************/
+  public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
+    cells.forEach((cellRow: Cell[], _x: number) => {
+      cellRow.forEach((cellNeighbor: Cell, _y: number) => {
+        if (cell !== cellNeighbor && cellNeighbor.isAlive) {
+          if (Math.abs(cell.coords.x - cellNeighbor.coords.x) <= distance) {
+            if (Math.abs(cell.coords.y - cellNeighbor.coords.y) <= distance) {
+              ++cell.prevLiveNeighborsCount;
+            }
+          }
+        }
+      });
+    });
+
+    cell.currentLiveNeighborsCount = cell.prevLiveNeighborsCount;
+    cell.prevLiveNeighborsCount = 0;
+
+    return cell.currentLiveNeighborsCount;
+  }
 
   public runRules() {
     this.cells.forEach((cellRow: Cell[]) => {
@@ -93,25 +112,6 @@ class CGOL {
         this.renderCell(cell);
       });
     });
-  }
-
-  public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
-    cells.forEach((cellRow: Cell[], _x: number) => {
-      cellRow.forEach((cellNeighbor: Cell, _y: number) => {
-        if (Math.abs(cell.coords.x - cellNeighbor.coords.x) <= distance) {
-          if (Math.abs(cell.coords.y - cellNeighbor.coords.y) <= distance) {
-            if (cellNeighbor.isAlive) {
-              ++cell.prevLiveNeighborsCount;
-            }
-          }
-        }
-      });
-    });
-
-    cell.currentLiveNeighborsCount = cell.prevLiveNeighborsCount;
-    cell.prevLiveNeighborsCount = 0;
-
-    return cell.currentLiveNeighborsCount;
   }
 
   public renderCell(cell: Cell): Cell {
