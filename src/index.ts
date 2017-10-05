@@ -70,10 +70,11 @@ class CGOL {
   /********************************************
   *********************************************
 
-  [ ALL METHODS BELOW ARE RUNNING AT 60 FPS!! ]
+  [ ALL METHODS BELOW ARE RUNNING AT ~60 FPS!! ]
 
   *********************************************
   *********************************************/
+
   public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
     cells.forEach((cellRow: Cell[], _x: number) => {
       cellRow.forEach((cellNeighbor: Cell, _y: number) => {
@@ -101,12 +102,12 @@ class CGOL {
         if (cell.isAlive) {
           if (liveNeighbors < 2 || liveNeighbors > 3) {
             cell.die();
-            this.clearCanvas(cell.coords.x, cell.coords.y, cell.width, cell.height);
+            this.cellStateChange(cell);
           }
         }else {
           if (liveNeighbors === 3) {
             cell.revive();
-            this.clearCanvas(cell.coords.x, cell.coords.y, cell.width, cell.height);
+            this.cellStateChange(cell);
           }
         }
         this.renderCell(cell);
@@ -119,6 +120,10 @@ class CGOL {
     this.canvasContext.fillRect(cell.coords.x, cell.coords.y, cell.width, cell.height);
 
     return cell;
+  }
+
+  public cellStateChange(cell: Cell) {
+    this.clearCanvas(cell.coords.x, cell.coords.y, cell.width, cell.height);
   }
 
   public clearCanvas(x: number = 0, y: number = 0, width: number = this.canvasMeta.canvasWidth, height: number = this.canvasMeta.canvasHeight): boolean {
