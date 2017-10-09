@@ -3,12 +3,13 @@ import Cell from './cell';
 import { ICanvasMeta } from './interfaces/i-canvas-meta';
 import { ICellOptions } from './interfaces/i-cell-options';
 import { ICoords } from './interfaces/i-coords';
+import { beehive } from './stable-patterns';
 import { generateMatrix, randomVectorBetween } from './utils';
 
 class CGOL {
-  public FPS_THROTTLE: null | number = 5;
-  public cellWidth: number = 10;
-  public cellHeight: number = 10;
+  public FPS_THROTTLE: null | number = 10;
+  public cellWidth: number = 4;
+  public cellHeight: number = 4;
   public cells: Array<[Cell]> | any;
   public newCells: Array<[Cell]> | any;
   public $canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -19,6 +20,7 @@ class CGOL {
     canvasScaleWidth: this.cellWidth,
     canvasScaleHeight: this.cellHeight
   };
+  public beehiveShape: [ICoords] = beehive();
 
   constructor() {
     this.initCanvas();
@@ -45,26 +47,35 @@ class CGOL {
 
     this.cells = generateMatrix(_cellCountX, _cellCountY);
 
-    this.cells.forEach((cellRow: Cell[], _y: number) => {
-      cellRow.forEach((cell: Cell, _x: number) => {
-        this.cells[_y][_x] = new Cell({
-          coords: {x: _x, y: _y},
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let ii = 0; ii < this.cells[i].length; ii++) {
+        this.cells[i][ii] = new Cell({
+          coords: {x: ii, y: i},
           width: _cellWidth,
           height: _cellHeight,
-          probabilityDOA: 0.95
+          probabilityDOA: 0.9
         });
-      });
-    });
+      }
+    }
 
     this.initRenderCells();
   }
 
-  public initRenderCells() {
-    this.cells.forEach((cellRow: Cell[], y: number) => {
-      cellRow.forEach((cell: Cell, x: number) => {
-        this.renderCell(cell);
-      });
+  public initSimpleShape(cell: Cell, shape: [ICoords]) {
+    this.beehiveShape.forEach((coord: ICoords) => {
+      if (JSON.stringify(coord) === JSON.stringify(cell.coords)) {
+        cell.revive();
+      }
     });
+  }
+
+  public initRenderCells() {
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let ii = 0; ii < this.cells[i].length; ii++) {
+        // this.initSimpleShape(this.cells[i][ii], this.beehiveShape);
+        this.renderCell(this.cells[i][ii]);
+      }
+    }
   }
 
   /********************************************
@@ -76,17 +87,17 @@ class CGOL {
   *********************************************/
 
   public getLiveNeighborsCount(cell: Cell, cells: Array<[Cell]>, distance: number = 1): number {
-    cells.forEach((cellRow: Cell[], _x: number) => {
-      cellRow.forEach((cellNeighbor: Cell, _y: number) => {
-        if (cell !== cellNeighbor && cellNeighbor.isAlive) {
-          if (Math.abs(cell.coords.x - cellNeighbor.coords.x) <= distance) {
-            if (Math.abs(cell.coords.y - cellNeighbor.coords.y) <= distance) {
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let ii = 0; ii < this.cells[i].length; ii++) {
+        if (cell !== cells[i][ii] && cells[i][ii].isAlive) {
+          if (Math.abs(cell.coords.x - cells[i][ii].coords.x) <= distance) {
+            if (Math.abs(cell.coords.y - cells[i][ii].coords.y) <= distance) {
               ++cell.prevLiveNeighborsCount;
             }
           }
         }
-      });
-    });
+      }
+    }
 
     cell.currentLiveNeighborsCount = cell.prevLiveNeighborsCount;
     cell.prevLiveNeighborsCount = 0;
@@ -95,24 +106,25 @@ class CGOL {
   }
 
   public runRules() {
-    this.cells.forEach((cellRow: Cell[]) => {
-      cellRow.forEach((cell: Cell) => {
-        let liveNeighbors = this.getLiveNeighborsCount(cell, this.cells);
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let ii = 0; ii < this.cells[i].length; ii++) {
 
-        if (cell.isAlive) {
+        let liveNeighbors = this.getLiveNeighborsCount(this.cells[i][ii], this.cells);
+
+        if (this.cells[i][ii].isAlive) {
           if (liveNeighbors < 2 || liveNeighbors > 3) {
-            cell.die();
-            this.cellStateChange(cell);
+            this.cells[i][ii].die();
+            this.cellStateChange(this.cells[i][ii]);
           }
         }else {
           if (liveNeighbors === 3) {
-            cell.revive();
-            this.cellStateChange(cell);
+            this.cells[i][ii].revive();
+            this.cellStateChange(this.cells[i][ii]);
           }
         }
-        this.renderCell(cell);
-      });
-    });
+        this.renderCell(this.cells[i][ii]);
+      }
+    }
   }
 
   public renderCell(cell: Cell): Cell {

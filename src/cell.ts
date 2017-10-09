@@ -10,6 +10,7 @@ export default class Cell implements ICellOptions {
   public isAlive: boolean = false;
   public prevLiveNeighborsCount: number = 0;
   public currentLiveNeighborsCount: number = 0;
+  public strCoords: string = '';
 
   constructor(options: ICellOptions) {
     this.coords = options.coords || {x: 0, y: 0};
@@ -17,6 +18,8 @@ export default class Cell implements ICellOptions {
     this.fillStyle = options.fillStyle || '#000';
     this.width = options.width || 1;
     this.height = options.height || 1;
+    this.strCoordsSet();
+    this.die();
     this.randomizeLife(this.probabilityDOA);
   }
 
@@ -51,5 +54,9 @@ export default class Cell implements ICellOptions {
     }else {
       this.die();
     }
+  }
+
+  private strCoordsSet() {
+    this.strCoords = JSON.stringify(this.coords);
   }
 };
